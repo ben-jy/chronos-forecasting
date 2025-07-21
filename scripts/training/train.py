@@ -561,6 +561,7 @@ def main(
     raw_training_config = deepcopy(locals())
     output_dir = Path(output_dir)
     training_data_paths = ast.literal_eval(training_data_paths)
+    training_data_paths = [os.path.expandvars(p) for p in training_data_paths] # to take env var into consideration
     assert isinstance(training_data_paths, list)
 
     if isinstance(probability, str):
