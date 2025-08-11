@@ -42,3 +42,9 @@ Paper = "https://arxiv.org/abs/2403.07815"
 
 [tool.mypy]
 ignore_missing_imports = true
+
+[dependency-groups]
+dev = [
+    "jupyter>=1.1.1",
+    "kaggle>=1.7.4.5",
+]
