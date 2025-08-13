@@ -9,7 +9,7 @@ import json
 
 with open("scripts/dataset/subsets.json", "r") as f:
     subsets = json.load(f)
-
+    
 def split_sequence(seq, max_len):
     seq = np.array(seq)
     # mean scaling

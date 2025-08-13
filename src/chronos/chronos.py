@@ -21,8 +21,11 @@ import chronos
 from chronos.base import BaseChronosPipeline, ForecastType
 from chronos.utils import left_pad_and_stack_1D
 
-logger = logging.getLogger(__file__)
+PAD_TOKEN_ID = 0
+EOS_TOKEN_ID = 1
+N_CONTROL_TOKENS = 2
 
+logger = logging.getLogger(__file__)
 
 @dataclass
 class ChronosConfig:
@@ -36,9 +39,8 @@ class ChronosConfig:
     context_length: int
     prediction_length: int
     n_tokens: int
-    n_special_tokens: int
-    pad_token_id: int
-    eos_token_id: int
+    n_freq_tokens: int
+    n_domain_tokens: int
     use_eos_token: bool
     model_type: Literal["causal", "seq2seq"]
     num_samples: int
@@ -46,16 +48,47 @@ class ChronosConfig:
     top_k: int
     top_p: float
 
+    # tokens id convention
+    # [0] = PAD, [1] = EOS, [2..2+n_freq_tokens] = FREQ, [2+n_freq_tokens+1..2+n_freq_tokens+1+n_domain_tokens] = DOMAIN,
+    # [>= n_special_tokens] = numerical tokens
+    @property
+    def pad_token_id(self) -> int:
+        return PAD_TOKEN_ID
+    @property
+    def eos_token_id(self) -> int:
+        return EOS_TOKEN_ID
+    @property
+    def freq_token_start_id(self) -> int:
+        return EOS_TOKEN_ID + 1
+    @property
+    def domain_token_start_id(self) -> int:
+        return self.freq_token_start_id + self.n_freq_tokens
+    @property
+    def n_control_tokens(self) -> int:
+        return N_CONTROL_TOKENS
+    @property
+    def n_condition_tokens(self) -> int:
+        return self.n_freq_tokens + self.n_domain_tokens
+    @property
+    def n_special_tokens(self) -> int:
+        return self.n_condition_tokens + self.n_control_tokens
+
     def __post_init__(self):
         assert (
-            self.pad_token_id < self.n_special_tokens
-            and self.eos_token_id < self.n_special_tokens
-        ), f"Special token id's must be smaller than {self.n_special_tokens=}"
+            self.n_special_tokens < self.n_tokens
+        ), f"Number of special token id's must be smaller than total number of tokens (={self.n_tokens})"
 
     def create_tokenizer(self) -> "ChronosTokenizer":
         class_ = getattr(chronos, self.tokenizer_class)
         return class_(**self.tokenizer_kwargs, config=self)
+    
+    def freq_token_id(self, idx: int) -> int:
+        assert 0 <= idx < self.n_freq_tokens
+        return self.freq_token_start_id + idx
 
+    def domain_token_id(self, idx: int) -> int:
+        assert 0 <= idx < self.n_domain_tokens
+        return self.domain_token_start_id + idx
 
 class ChronosTokenizer:
     """

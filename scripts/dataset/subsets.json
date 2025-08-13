@@ -4,32 +4,44 @@
     "hf_subset_name": "brazilian_cities_temperature",
     "hf_dataset_name": "autogluon/chronos_datasets_extra",
     "freq": "M",
-    "domain": "weather",
-    "target_name": "temperature"
+    "target": [
+      {"name" : "temperature",
+       "domain": "weather"}
+    ]
   },
   "mexico_city_bikes": {
     "name": "Mexico City Bikes",
     "hf_subset_name": "mexico_city_bikes",
     "hf_dataset_name": "autogluon/chronos_datasets",
     "freq": "h",
-    "domain": "transport",
-    "target_name": "target"
+    "target": [
+      {"name" : "target",
+       "domain": "transport"}
+    ]
   },
   "solar_5min": {
     "name": "Solar (5 Min.)",
     "hf_subset_name": "solar",
     "hf_dataset_name": "autogluon/chronos_datasets",
     "freq": "5min",
-    "domain": "energy",
-    "target_name": "target"
+    "target": [
+      {"name" : "power_mw",
+       "domain": "energy"},
+      {"name" : "capacity_mw",
+       "domain": "energy"}
+    ]
   },
   "solar_hourly": {
     "name": "Solar (Hourly)",
     "hf_subset_name": "solar_1h",
     "hf_dataset_name": "autogluon/chronos_datasets",
     "freq": "h",
-    "domain": "energy",
-    "target_name": "target"
+    "target": [
+      {"name" : "power_mw",
+       "domain": "energy"},
+      {"name" : "capacity_mw",
+       "domain": "energy"}
+    ]
   },
   "spanish_energy_weather": {
     "name": "Spanish Energy and Weather",
