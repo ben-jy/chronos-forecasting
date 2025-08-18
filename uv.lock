@@ -521,6 +521,7 @@ version = "1.5.2"
 source = { editable = "." }
 dependencies = [
     { name = "accelerate" },
+    { name = "notebook" },
     { name = "torch" },
     { name = "transformers" },
 ]
@@ -566,6 +567,7 @@ requires-dist = [
     { name = "gluonts", extras = ["pro"], marker = "extra == 'training'", specifier = "~=0.15" },
     { name = "joblib", marker = "extra == 'training'" },
     { name = "mypy", marker = "extra == 'typecheck'", specifier = "~=1.9" },
+    { name = "notebook", specifier = ">=7.4.5" },
     { name = "numpy", marker = "extra == 'evaluation'", specifier = "~=1.21" },
     { name = "numpy", marker = "extra == 'test'", specifier = "~=1.21" },
     { name = "numpy", marker = "extra == 'training'", specifier = "~=1.21" },

@@ -49,7 +49,8 @@ class ChronosConfig:
     top_p: float
 
     # tokens id convention
-    # [0] = PAD, [1] = EOS, [2..2+n_freq_tokens] = FREQ, [2+n_freq_tokens+1..2+n_freq_tokens+1+n_domain_tokens] = DOMAIN,
+    # [0] = PAD, [1] = EOS, [2 .. 2 + n_freq_tokens - 1] = FREQ,
+    # [2 + n_freq_tokens .. 2 + n_freq_tokens + n_domain_tokens - 1 ] = DOMAIN,
     # [>= n_special_tokens] = numerical tokens
     @property
     def pad_token_id(self) -> int:
@@ -74,9 +75,12 @@ class ChronosConfig:
         return self.n_condition_tokens + self.n_control_tokens
 
     def __post_init__(self):
-        assert (
-            self.n_special_tokens < self.n_tokens
-        ), f"Number of special token id's must be smaller than total number of tokens (={self.n_tokens})"
+        assert self.n_freq_tokens >= 0 and self.n_domain_tokens >= 0, \
+            "n_freq_tokens and n_domain_tokens must be >= 0"
+        assert self.n_special_tokens == self.n_control_tokens + self.n_condition_tokens
+        assert self.n_tokens > self.n_special_tokens, \
+            (f"n_tokens must be > n_special_tokens (got n_tokens={self.n_tokens}, "
+             f"n_special_tokens={self.n_special_tokens})")
 
     def create_tokenizer(self) -> "ChronosTokenizer":
         class_ = getattr(chronos, self.tokenizer_class)
@@ -90,6 +94,38 @@ class ChronosConfig:
         assert 0 <= idx < self.n_domain_tokens
         return self.domain_token_start_id + idx
 
+    def validate_condition_args(
+            self,
+            freq_id: Optional[Union[int, torch.Tensor]],
+            domain_id: Optional[Union[int, torch.Tensor]],
+    ) -> None:
+
+        if freq_id is not None:
+            if self.n_freq_tokens == 0:
+                raise ValueError("freq_ids provided but n_freq_tokens == 0 in config.")
+            if isinstance(freq_id, int):
+                if not (0 <= freq_id < self.n_freq_tokens):
+                    raise ValueError(f"freq_ids={freq_id} out of range [0, {self.n_freq_tokens - 1}].")
+            else:
+                if freq_id.numel() == 0:
+                    raise ValueError("freq_ids tensor is empty.")
+                if (freq_id < 0).any() or (freq_id >= self.n_freq_tokens).any():
+                    raise ValueError(f"Some freq_ids are out of range [0, {self.n_freq_tokens - 1}].")
+
+        if domain_id is not None:
+            if self.n_domain_tokens == 0:
+                raise ValueError("domain_ids provided but n_domain_tokens == 0 in config.")
+            if isinstance(domain_id, int):
+                if not (0 <= domain_id < self.n_domain_tokens):
+                    raise ValueError(f"domain_ids={domain_id} out of range [0, {self.n_domain_tokens - 1}].")
+            else:
+                # Tensor case
+                if domain_id.numel() == 0:
+                    raise ValueError("domain_ids tensor is empty.")
+                if (domain_id < 0).any() or (domain_id >= self.n_domain_tokens).any():
+                    raise ValueError(f"Some domain_ids are out of range [0, {self.n_domain_tokens - 1}].")
+
+
 class ChronosTokenizer:
     """
     A ``ChronosTokenizer`` definines how time series are mapped into token IDs
@@ -102,6 +138,8 @@ class ChronosTokenizer:
     def context_input_transform(
         self,
         context: torch.Tensor,
+        freq_id: Optional[Union[int, torch.Tensor]] = None,
+        domain_id: Optional[Union[int, torch.Tensor]] = None,
     ) -> Tuple:
         """
         Turn a batch of time series into token IDs, attention map, and tokenizer_state.
@@ -112,6 +150,7 @@ class ChronosTokenizer:
             A tensor shaped (batch_size, time_length), containing the
             timeseries to forecast. Use left-padding with ``torch.nan``
             to align time series of different lengths.
+c
 
         Returns
         -------
@@ -246,8 +285,49 @@ class MeanScaleUniformBins(ChronosTokenizer):
 
         return token_ids, attention_mask
 
+    def _make_condition_prefix(
+        self,
+        batch_size: int,
+        device: torch.device,
+        freq_id: Optional[Union[int, torch.Tensor]],
+        domain_id: Optional[Union[int, torch.Tensor]],
+    ) -> Optional[torch.Tensor]:
+
+        self.config.validate_condition_args(freq_id=freq_id, domain_id=domain_id)
+
+        pieces = []
+
+        if freq_id is not None:
+            if isinstance(freq_id, int):
+                # apply freq to all series in the batch
+                freq_id = torch.full((batch_size,), freq_id, dtype=torch.long, device=device)
+            else:
+                freq_id = freq_id.to(device=device, dtype=torch.long)
+            freq_tok_ids = torch.tensor(
+                [self.config.freq_token_id(i.item()) for i in freq_id],
+                dtype=torch.long, device=device
+            ).unsqueeze(1)  # (B,1)
+            pieces.append(freq_tok_ids)
+
+        if domain_id is not None:
+            if isinstance(domain_id, int):
+                domain_id = torch.full((batch_size,), domain_id, dtype=torch.long, device=device)
+            else:
+                domain_id = domain_id.to(device=device, dtype=torch.long)
+            dom_tok_ids = torch.tensor(
+                [self.config.domain_token_id(i.item()) for i in domain_id],
+                dtype=torch.long, device=device
+            ).unsqueeze(1)  # (B,1)
+            pieces.append(dom_tok_ids)
+
+        if not pieces:
+            return None
+        return torch.cat(pieces, dim=1)  # (B, num_cond) ; num_cond ∈ {1,2}
+
     def context_input_transform(
-        self, context: torch.Tensor
+        self, context: torch.Tensor,
+        freq_id: Optional[Union[int, torch.Tensor]] = None,
+        domain_id: Optional[Union[int, torch.Tensor]] = None,
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         length = context.shape[-1]
 
@@ -255,6 +335,21 @@ class MeanScaleUniformBins(ChronosTokenizer):
             context = context[..., -self.config.context_length :]
 
         token_ids, attention_mask, scale = self._input_transform(context=context)
+
+        # prepend condition tokens
+        cond_prefix = self._make_condition_prefix(
+            batch_size=token_ids.size(0),
+            device=token_ids.device,
+            freq_id=freq_id,
+            domain_id=domain_id,
+        )
+        if cond_prefix is not None:
+            token_ids = torch.cat([cond_prefix, token_ids], dim=1)
+            cond_mask = torch.ones(
+                (attention_mask.size(0), cond_prefix.size(1)),
+                dtype=attention_mask.dtype, device=attention_mask.device
+            )
+            attention_mask = torch.cat([cond_mask, attention_mask], dim=1)
 
         if self.config.use_eos_token and self.config.model_type == "seq2seq":
             token_ids, attention_mask = self._append_eos_token(
@@ -446,7 +541,10 @@ class ChronosPipeline(BaseChronosPipeline):
 
     @torch.no_grad()
     def embed(
-        self, context: Union[torch.Tensor, List[torch.Tensor]]
+        self,
+        context: Union[torch.Tensor, List[torch.Tensor]],
+        freq_id: Optional[Union[int, torch.Tensor]] = None,
+        domain_id: Optional[Union[int, torch.Tensor]] = None,
     ) -> Tuple[torch.Tensor, Any]:
         """
         Get encoder embeddings for the given time series.
@@ -458,6 +556,15 @@ class ChronosPipeline(BaseChronosPipeline):
             of 1D tensors, or a 2D tensor whose first dimension
             is batch. In the latter case, use left-padding with
             ``torch.nan`` to align series of different lengths.
+
+        freq_id
+            Series frequency. A tensor shaped (batch_size,) or an int,
+            containing the frequency of the timeseries. If an integer
+            is provided, the frequency is applied to every series in the batch.
+        domain_id
+            A tensor shaped (batch_size,) or an int, containing the
+            domain of the timeseries. If an integer is provided,
+            the domain is applied to every series in the batch.
 
         Returns
         -------
@@ -472,7 +579,7 @@ class ChronosPipeline(BaseChronosPipeline):
         """
         context_tensor = self._prepare_and_validate_context(context=context)
         token_ids, attention_mask, tokenizer_state = (
-            self.tokenizer.context_input_transform(context_tensor)
+            self.tokenizer.context_input_transform(context_tensor, freq_id=freq_id, domain_id=domain_id)
         )
         embeddings = self.model.encode(
             input_ids=token_ids.to(self.model.device),
@@ -489,6 +596,8 @@ class ChronosPipeline(BaseChronosPipeline):
         top_k: Optional[int] = None,
         top_p: Optional[float] = None,
         limit_prediction_length: bool = False,
+        freq_id: Optional[Union[int, torch.Tensor]] = None,
+        domain_id: Optional[Union[int, torch.Tensor]] = None,
     ) -> torch.Tensor:
         """
         Get forecasts for the given time series.
@@ -542,7 +651,7 @@ class ChronosPipeline(BaseChronosPipeline):
 
         while remaining > 0:
             token_ids, attention_mask, scale = self.tokenizer.context_input_transform(
-                context_tensor
+                context_tensor, freq_id=freq_id, domain_id=domain_id
             )
             samples = self.model(
                 token_ids.to(self.model.device),
@@ -612,6 +721,14 @@ class ChronosPipeline(BaseChronosPipeline):
         else:
             assert chronos_config.model_type == "causal"
             inner_model = AutoModelForCausalLM.from_pretrained(*args, **kwargs)
+
+        # check vocabulary
+        hf_vocab = inner_model.get_input_embeddings().num_embeddings
+        if hf_vocab != chronos_config.n_tokens:
+            raise ValueError(
+                "Vocabulary size mismatch between checkpoint and current config. \n"
+                f"{hf_vocab} != {chronos_config.n_tokens}"
+            )
 
         return cls(
             tokenizer=chronos_config.create_tokenizer(),
