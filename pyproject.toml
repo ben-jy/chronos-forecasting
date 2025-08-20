@@ -48,4 +48,5 @@ ignore_missing_imports = true
 dev = [
     "jupyter>=1.1.1",
     "kaggle>=1.7.4.5",
+    "pandas>=2.3.0",
 ]

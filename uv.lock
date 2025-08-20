@@ -556,6 +556,7 @@ typecheck = [
 dev = [
     { name = "jupyter" },
     { name = "kaggle" },
+    { name = "pandas" },
 ]
 
 [package.metadata]
@@ -586,6 +587,7 @@ provides-extras = ["test", "typecheck", "training", "evaluation"]
 dev = [
     { name = "jupyter", specifier = ">=1.1.1" },
     { name = "kaggle", specifier = ">=1.7.4.5" },
+    { name = "pandas", specifier = ">=2.3.0" },
 ]
 
 [[package]]

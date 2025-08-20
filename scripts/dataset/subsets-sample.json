@@ -1,0 +1,85 @@
+{
+  "taxi_30min": {
+    "name": "Taxi (30 Min.)",
+    "hf_subset_name": "taxi_30min",
+    "hf_dataset_name": "autogluon/chronos_datasets",
+    "freq": "30min",
+    "domain": "transport",
+    "target": [
+      {
+        "name": "target",
+        "domain": "transport"
+      }
+    ]
+  },
+  "mexico_city_bikes": {
+    "name": "Mexico City Bikes",
+    "hf_subset_name": "mexico_city_bikes",
+    "hf_dataset_name": "autogluon/chronos_datasets",
+    "freq": "h",
+    "target": [
+      {
+        "name": "target",
+        "domain": "transport"
+      }
+    ]
+  },
+  "kddcup2018": {
+    "name": "KDD Cup 2018",
+    "hf_subset_name": "monash_kdd_cup_2018",
+    "hf_dataset_name": "autogluon/chronos_datasets",
+    "freq": "h",
+    "domain": "weather",
+    "target": [
+      {
+        "name": "target",
+        "domain": "weather"
+      }
+    ]
+  },
+  "solar_5min": {
+    "name": "Solar (5 Min.)",
+    "hf_subset_name": "solar",
+    "hf_dataset_name": "autogluon/chronos_datasets",
+    "freq": "5min",
+    "target": [
+      {
+        "name": "power_mw",
+        "domain": "energy"
+      },
+      {
+        "name": "capacity_mw",
+        "domain": "energy"
+      }
+    ]
+  },
+  "wiki_daily_100k": {
+    "name": "Wiki Daily (100k)",
+    "hf_subset_name": "wiki_daily_100k",
+    "hf_dataset_name": "autogluon/chronos_datasets",
+    "freq": "D",
+    "domain": "web",
+    "target": [
+      {
+        "name": "target",
+        "domain": "web"
+      }
+    ]
+  },
+  "solar_hourly": {
+    "name": "Solar (Hourly)",
+    "hf_subset_name": "solar_1h",
+    "hf_dataset_name": "autogluon/chronos_datasets",
+    "freq": "h",
+    "target": [
+      {
+        "name": "power_mw",
+        "domain": "energy"
+      },
+      {
+        "name": "capacity_mw",
+        "domain": "energy"
+      }
+    ]
+  }
+}
