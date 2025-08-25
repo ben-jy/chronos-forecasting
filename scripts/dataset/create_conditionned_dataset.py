@@ -42,6 +42,11 @@ def get_domain_id(domain: str) -> int:
     
 def split_sequence(seq, max_len):
     seq = np.array(seq)
+    if seq.ndim == 0:
+        # empty
+        return []
+    if seq.ndim > 1:
+        raise ValueError("Sequence must be 1D")
     # mean scaling
     # mean = np.nanmean(np.abs(seq))
     # seq = seq / mean if mean != 0 else seq
