@@ -166,3 +166,4 @@ cython_debug/
 # macOS stuff
 .DS_storedev/
 dev
+data
