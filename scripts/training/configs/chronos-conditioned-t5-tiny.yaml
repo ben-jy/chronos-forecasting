@@ -1,5 +1,5 @@
 training_data_paths:
-- "$PROJECTS/chronos-cond.arrow"
+- "data/chronos-cond.arrow"
 probability:
 - 1.0
 context_length: 512
