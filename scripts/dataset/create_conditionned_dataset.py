@@ -38,7 +38,10 @@ def get_domain_id(domain: str) -> int:
     elif domain == "web":
         return 3
     else:
-        return 4 # i.e. any
+        # basically means any
+        # important question though : in chronos, should we set a token for "any", or should be just consider that there
+        # is not conditioning ?
+        return 4
     
 def split_sequence(seq, max_len):
     seq = np.array(seq)

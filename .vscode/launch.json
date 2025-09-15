@@ -1,0 +1,16 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File with Arguments",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["--subset_info_file", "scripts/dataset/subsets_new.json", "--batch_size", "1024", "--max_timesteps", "1024", "--arrow_output_path", "$PROJECTS/cond_chronos.arrows"]
+        }
+    ]
+}
