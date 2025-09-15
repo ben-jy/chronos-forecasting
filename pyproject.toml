@@ -1,12 +1,13 @@
 [project]
-name = "chronos-forecasting"
+name = "cond-chronos-forecasting"
 version = "1.5.2"
 authors = [
   { name="Abdul Fatir Ansari", email="ansarnd@amazon.com" },
   { name="Lorenzo Stella", email="stellalo@amazon.com" },
   { name="Caner Turkmen", email="atturkm@amazon.com" },
+  { name="Benjamin Pasquier", email="benjamin.pasquier@hefr.ch"},
 ]
-description = "Chronos: Pretrained models for time series forecasting"
+description = "Chronos: Pretrained models for time series forecasting, with conditioning"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.9"
