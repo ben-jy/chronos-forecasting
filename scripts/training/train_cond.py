@@ -44,7 +44,12 @@ from gluonts.transform import (
     LastValueImputation,
 )
 
-from chronos import ChronosConfig, ChronosTokenizer
+from chronos import (
+    ChronosCondConfig as ChronosConfig, 
+    ChronosCondTokenizer as ChronosTokenizer,
+    PAD_TOKEN_ID,
+    EOS_TOKEN_ID,
+)
 
 
 app = typer.Typer(pretty_exceptions_enable=False)
@@ -236,6 +241,7 @@ class PseudoShuffledIterableDataset(IterableDataset):
         self.generator = torch.Generator()
 
     def __iter__(self):
+        self.generator.manual_seed(torch.seed())
         shuffle_buffer = []
 
         for element in self.base_dataset:
@@ -328,7 +334,9 @@ class ChronosDataset(IterableDataset, ShuffleMixin):
         self.np_dtype = np_dtype
 
     def preprocess_entry(self, entry: dict, mode: str) -> dict:
-        entry = {f: entry[f] for f in ["start", "target"]}
+        keep = ["start", "target", "freq", "domain"]
+        entry = {f: entry[f] for f in keep if f in entry}
+
         entry["target"] = np.asarray(entry["target"], dtype=self.np_dtype)
         assert entry["target"].ndim == 1, f"got {entry['target'].ndim=}, expected 1"
 
@@ -393,9 +401,15 @@ class ChronosDataset(IterableDataset, ShuffleMixin):
 
     def to_hf_format(self, entry: dict) -> dict:
         past_target = torch.tensor(entry["past_target"]).unsqueeze(0)
+
+        freq_id = entry.get("freq", None)
+        domain_id = entry.get("domain", None)
         input_ids, attention_mask, scale = self.tokenizer.context_input_transform(
-            past_target
+            past_target,
+            freq_id=freq_id,
+            domain_id=domain_id,
         )
+
         future_target = torch.tensor(entry["future_target"]).unsqueeze(0)
         labels, labels_mask = self.tokenizer.label_input_transform(future_target, scale)
         labels[labels_mask == 0] = -100
@@ -406,33 +420,51 @@ class ChronosDataset(IterableDataset, ShuffleMixin):
             # position embeddings should not be trained with left padding.
             # The following piece of code moves padding from left to right.
 
-            assert input_ids.shape[-1] == entry["past_is_pad"].shape[0]
 
-            # Find the index where padding starts
-            pad_start_idx = np.searchsorted(1 - entry["past_is_pad"], 1)
+            # FOLLOWING CODE IS MAINLY CHATGPT, AS WE DON'T REALLY USE CAUSAL IN OUR CASE
+            # past_is_pad only covers the past segment, not the prefix ---
+            past_is_pad = entry["past_is_pad"]
+            total_len = input_ids.shape[-1]
+            past_len = past_is_pad.shape[0]
+            prefix_len = total_len - past_len
+            assert prefix_len >= 0, "Negative prefix_len — check tokenizer/context trimming."
+
+            # split into [prefix | past_data]
+            prefix_input_ids = input_ids[..., :prefix_len]
+            prefix_attention_mask = attention_mask[..., :prefix_len]
+            data_input_ids = input_ids[..., prefix_len:]
+            data_attention_mask = attention_mask[..., prefix_len:]
+
+            # find the index where left padding starts within the past_data segment
+            pad_start_idx = np.searchsorted(1 - past_is_pad, 1)
+
+            # split [left_pad | observed] for the past_data segment only
             padded_input_ids, obs_input_ids = torch.tensor_split(
-                input_ids, [pad_start_idx], dim=-1
+                data_input_ids, [pad_start_idx], dim=-1
             )
             padded_attention_mask, obs_attention_mask = torch.tensor_split(
-                attention_mask, [pad_start_idx], dim=-1
+                data_attention_mask, [pad_start_idx], dim=-1
             )
 
-            # Move padding to the right
+            # compose final causal training input:
+            # [prefix | observed_past | labels | right_pad]
             input_ids = torch.cat(
                 [
+                    prefix_input_ids,
                     obs_input_ids,
                     labels,
                     padded_input_ids,
                 ],
-                axis=-1,
+                dim=-1,
             )
             attention_mask = torch.cat(
                 [
+                    prefix_attention_mask,
                     obs_attention_mask,
                     labels_mask,
                     padded_attention_mask,
                 ],
-                axis=-1,
+                dim=-1,
             )
 
             # labels for causal models are same as the input_ids.
@@ -525,9 +557,8 @@ def main(
     tokenizer_class: str = "MeanScaleUniformBins",
     tokenizer_kwargs: str = "{'low_limit': -15.0, 'high_limit': 15.0}",
     n_tokens: int = 4096,
-    n_special_tokens: int = 2,
-    pad_token_id: int = 0,
-    eos_token_id: int = 1,
+    n_freq_tokens: int = 0,
+    n_domain_tokens: int = 0,
     use_eos_token: bool = True,
     lr_scheduler_type: str = "linear",
     warmup_ratio: float = 0.0,
@@ -620,17 +651,16 @@ def main(
         vocab_size=n_tokens,
         random_init=random_init,
         tie_embeddings=tie_embeddings,
-        pad_token_id=pad_token_id,
-        eos_token_id=eos_token_id,
+        pad_token_id=PAD_TOKEN_ID,
+        eos_token_id=EOS_TOKEN_ID,
     )
 
     chronos_config = ChronosConfig(
         tokenizer_class=tokenizer_class,
         tokenizer_kwargs=tokenizer_kwargs,
         n_tokens=n_tokens,
-        n_special_tokens=n_special_tokens,
-        pad_token_id=pad_token_id,
-        eos_token_id=eos_token_id,
+        n_freq_tokens=n_freq_tokens,
+        n_domain_tokens=n_domain_tokens,
         use_eos_token=use_eos_token,
         model_type=model_type,
         context_length=context_length,

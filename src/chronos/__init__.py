@@ -8,10 +8,18 @@ from .chronos import (
     ChronosPipeline,
     ChronosTokenizer,
     MeanScaleUniformBins,
+)
+from .chronos_bolt import ChronosBoltConfig, ChronosBoltPipeline
+
+from .chronos_cond import (
+    ChronosCondConfig,
+    ChronosCondModel,
+    ChronosCondPipeline,
+    ChronosCondTokenizer,
+    CondMeanScaleUniformBins,
     PAD_TOKEN_ID,
     EOS_TOKEN_ID
 )
-from .chronos_bolt import ChronosBoltConfig, ChronosBoltPipeline
 
 __all__ = [
     "BaseChronosPipeline",
@@ -23,6 +31,11 @@ __all__ = [
     "MeanScaleUniformBins",
     "ChronosBoltConfig",
     "ChronosBoltPipeline",
+    "ChronosCondConfig",
+    "ChronosCondModel",
+    "ChronosCondPipeline",
+    "ChronosCondTokenizer",
+    "CondMeanScaleUniformBins",
     "PAD_TOKEN_ID",
     "EOS_TOKEN_ID"
 ]

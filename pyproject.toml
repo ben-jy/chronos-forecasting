@@ -1,5 +1,5 @@
 [project]
-name = "cond-chronos-forecasting"
+name = "chronos-forecasting-with-cond"
 version = "1.5.2"
 authors = [
   { name="Abdul Fatir Ansari", email="ansarnd@amazon.com" },
