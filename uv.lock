@@ -516,6 +516,79 @@ wheels = [
 ]
 
 [[package]]
+name = "chronos-forecasting"
+version = "1.5.3"
+source = { editable = "." }
+dependencies = [
+    { name = "accelerate" },
+    { name = "torch" },
+    { name = "transformers" },
+]
+
+[package.optional-dependencies]
+evaluation = [
+    { name = "datasets" },
+    { name = "gluonts", extra = ["pro"] },
+    { name = "numpy" },
+    { name = "typer" },
+]
+test = [
+    { name = "numpy" },
+    { name = "pytest" },
+]
+training = [
+    { name = "datasets" },
+    { name = "gluonts", extra = ["pro"] },
+    { name = "joblib" },
+    { name = "numpy" },
+    { name = "scikit-learn", version = "1.6.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "scikit-learn", version = "1.7.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "tensorboard" },
+    { name = "typer" },
+    { name = "typer-config" },
+]
+typecheck = [
+    { name = "mypy" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "jupyter" },
+    { name = "kaggle" },
+    { name = "pandas" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "accelerate", specifier = ">=0.32,<2" },
+    { name = "datasets", marker = "extra == 'evaluation'", specifier = ">=2.18,<4" },
+    { name = "datasets", marker = "extra == 'training'", specifier = ">=2.18,<4" },
+    { name = "gluonts", extras = ["pro"], marker = "extra == 'evaluation'", specifier = "~=0.15" },
+    { name = "gluonts", extras = ["pro"], marker = "extra == 'training'", specifier = "~=0.15" },
+    { name = "joblib", marker = "extra == 'training'" },
+    { name = "mypy", marker = "extra == 'typecheck'", specifier = "~=1.9" },
+    { name = "numpy", marker = "extra == 'evaluation'", specifier = ">=1.21,<3" },
+    { name = "numpy", marker = "extra == 'test'", specifier = ">=1.21,<3" },
+    { name = "numpy", marker = "extra == 'training'", specifier = ">=1.21,<3" },
+    { name = "pytest", marker = "extra == 'test'", specifier = "~=8.0" },
+    { name = "scikit-learn", marker = "extra == 'training'" },
+    { name = "tensorboard", marker = "extra == 'training'" },
+    { name = "torch", specifier = ">=2.0,<3" },
+    { name = "transformers", specifier = ">=4.48,<5" },
+    { name = "typer", marker = "extra == 'evaluation'" },
+    { name = "typer", marker = "extra == 'training'" },
+    { name = "typer-config", marker = "extra == 'training'" },
+]
+provides-extras = ["test", "typecheck", "training", "evaluation"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "jupyter", specifier = ">=1.1.1" },
+    { name = "kaggle", specifier = ">=1.7.4.5" },
+    { name = "pandas", specifier = ">=2.3.0" },
+]
+
+[[package]]
 name = "click"
 version = "8.1.8"
 source = { registry = "https://pypi.org/simple" }
@@ -564,81 +637,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/4c/13/7d740c5849255756bc17888787313b61fd38a0a8304fc4f073dfc46122aa/comm-0.2.3.tar.gz", hash = "sha256:2dc8048c10962d55d7ad693be1e7045d891b7ce8d999c97963a5e3e99c055971", size = 6319, upload-time = "2025-07-25T14:02:04.452Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/60/97/891a0971e1e4a8c5d2b20bbe0e524dc04548d2307fee33cdeba148fd4fc7/comm-0.2.3-py3-none-any.whl", hash = "sha256:c615d91d75f7f04f095b30d1c1711babd43bdc6419c1be9886a85f2f4e489417", size = 7294, upload-time = "2025-07-25T14:02:02.896Z" },
-]
-
-[[package]]
-name = "cond-chronos-forecasting"
-version = "1.5.2"
-source = { editable = "." }
-dependencies = [
-    { name = "accelerate" },
-    { name = "notebook" },
-    { name = "torch" },
-    { name = "transformers" },
-]
-
-[package.optional-dependencies]
-evaluation = [
-    { name = "datasets" },
-    { name = "gluonts", extra = ["pro"] },
-    { name = "numpy" },
-    { name = "typer" },
-]
-test = [
-    { name = "numpy" },
-    { name = "pytest" },
-]
-training = [
-    { name = "datasets" },
-    { name = "gluonts", extra = ["pro"] },
-    { name = "joblib" },
-    { name = "numpy" },
-    { name = "scikit-learn", version = "1.6.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "scikit-learn", version = "1.7.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "tensorboard" },
-    { name = "typer" },
-    { name = "typer-config" },
-]
-typecheck = [
-    { name = "mypy" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "jupyter" },
-    { name = "kaggle" },
-    { name = "pandas" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "accelerate", specifier = ">=0.32,<2" },
-    { name = "datasets", marker = "extra == 'evaluation'", specifier = "~=2.18" },
-    { name = "datasets", marker = "extra == 'training'", specifier = "~=2.18" },
-    { name = "gluonts", extras = ["pro"], marker = "extra == 'evaluation'", specifier = "~=0.15" },
-    { name = "gluonts", extras = ["pro"], marker = "extra == 'training'", specifier = "~=0.15" },
-    { name = "joblib", marker = "extra == 'training'" },
-    { name = "mypy", marker = "extra == 'typecheck'", specifier = "~=1.9" },
-    { name = "notebook", specifier = ">=7.4.5" },
-    { name = "numpy", marker = "extra == 'evaluation'", specifier = "~=1.21" },
-    { name = "numpy", marker = "extra == 'test'", specifier = "~=1.21" },
-    { name = "numpy", marker = "extra == 'training'", specifier = "~=1.21" },
-    { name = "pytest", marker = "extra == 'test'", specifier = "~=8.0" },
-    { name = "scikit-learn", marker = "extra == 'training'" },
-    { name = "tensorboard", marker = "extra == 'training'" },
-    { name = "torch", specifier = ">=2.0,<3" },
-    { name = "transformers", specifier = ">=4.48,<5" },
-    { name = "typer", marker = "extra == 'evaluation'" },
-    { name = "typer", marker = "extra == 'training'" },
-    { name = "typer-config", marker = "extra == 'training'" },
-]
-provides-extras = ["test", "typecheck", "training", "evaluation"]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "jupyter", specifier = ">=1.1.1" },
-    { name = "kaggle", specifier = ">=1.7.4.5" },
-    { name = "pandas", specifier = ">=2.3.0" },
 ]
 
 [[package]]
