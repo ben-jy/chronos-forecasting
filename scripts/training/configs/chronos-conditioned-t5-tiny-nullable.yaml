@@ -1,19 +1,19 @@
 training_data_paths:
-- "$PROJECTS/cond_chronos_clean_shuffled.arrow"
+- "$PROJECTS/cond_chronos_nullable.arrow"
 probability:
 - 1.0
 context_length: 512
 prediction_length: 64
 min_past: 60
-max_steps: 400_000
-save_steps: 150_000
-log_steps: 1000
+max_steps: 200_000
+save_steps: 100_000
+log_steps: 100
 per_device_train_batch_size: 128
 learning_rate: 0.001
 optim: adamw_torch_fused
 num_samples: 20
-shuffle_buffer_length: 1_000_000
-gradient_accumulation_steps: 1
+shuffle_buffer_length: 200_000
+gradient_accumulation_steps: 2
 model_id: google/t5-efficient-tiny
 model_type: seq2seq
 random_init: true
@@ -27,10 +27,9 @@ tokenizer_kwargs:
   high_limit: 15.0
 n_tokens: 4096
 n_freq_tokens: 3
-n_domain_tokens: 5
+n_domain_tokens: 4
 lr_scheduler_type: linear
 warmup_ratio: 0.0
 dataloader_num_workers: 1
 max_missing_prop: 0.9
 use_eos_token: true
-use_condition_none_token: false

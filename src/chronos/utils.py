@@ -5,7 +5,15 @@
 from typing import List
 from pandas.tseries.frequencies import to_offset
 import torch
-
+from pandas.tseries.offsets import (
+    Tick,
+    Day, BusinessDay, CDay,
+    Week, WeekOfMonth,
+    MonthEnd, MonthBegin, BMonthEnd, BMonthBegin,
+    QuarterEnd, QuarterBegin, BQuarterEnd, BQuarterBegin,
+    YearEnd, YearBegin, BYearEnd, BYearBegin, SemiMonthBegin,
+    SemiMonthEnd
+)
 
 def left_pad_and_stack_1D(tensors: List[torch.Tensor]) -> torch.Tensor:
     max_len = max(len(c) for c in tensors)
@@ -23,19 +31,20 @@ def get_frequency_id(freq: str) -> int:
     try:
         offset = to_offset(freq)
     except ValueError:
-        raise ValueError(f"Invalid frequency string: {freq}")
+        print(f"Warning: frequency {freq} not recognized. Will return None as frequency id.")
+        return None
 
-    rule = offset.rule_code
-
-    high_freq = {"ns", "us", "ms", "s", "min", "h"}
-    mid_freq = {"D", "B", "W", "W-MON", "W-SUN"}
-
-    if rule in high_freq:
-        return 0
-    elif rule in mid_freq:
-        return 1
-    else:
+    if isinstance(offset, (MonthEnd, MonthBegin, BMonthEnd, BMonthBegin,
+                             QuarterEnd, QuarterBegin, BQuarterEnd, BQuarterBegin,
+                             YearEnd, YearBegin, BYearEnd, BYearBegin, SemiMonthBegin, SemiMonthEnd)):
         return 2
+    elif isinstance(offset, (Day, CDay, BusinessDay, Week, WeekOfMonth)):
+        return 1
+    elif isinstance(offset, Tick):
+        return 0 if offset.nanos < to_offset("D").nanos else 1
+    else:
+        print(f"Warning: frequency {freq} not recognized. Will return None as frequency id.")
+        return None
 
 def get_domain_id(domain: str) -> int:
     if domain == "transport":
@@ -47,5 +56,4 @@ def get_domain_id(domain: str) -> int:
     elif domain == "web":
         return 3
     else:
-        # basically means any
         return None

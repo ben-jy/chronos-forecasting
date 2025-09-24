@@ -47,6 +47,7 @@ class ChronosCondConfig:
     temperature: float
     top_k: int
     top_p: float
+    use_condition_none_token: bool = True
 
     # tokens id convention
     # [0] = PAD, [1] = EOS, [2 .. 2 + n_freq_tokens - 1] = FREQ,
@@ -63,16 +64,27 @@ class ChronosCondConfig:
         return EOS_TOKEN_ID + 1
     @property
     def domain_token_start_id(self) -> int:
-        return self.freq_token_start_id + self.n_freq_tokens
+        return self.freq_token_start_id + self.n_freq_tokens + (1 if self.use_condition_none_token else 0)
     @property
     def n_control_tokens(self) -> int:
         return N_CONTROL_TOKENS
     @property
     def n_condition_tokens(self) -> int:
-        return self.n_freq_tokens + self.n_domain_tokens
+        return (
+            self.n_freq_tokens + self.n_domain_tokens
+            + (2 if self.use_condition_none_token else 0)
+        )
     @property
     def n_special_tokens(self) -> int:
         return self.n_condition_tokens + self.n_control_tokens
+    @property
+    def freq_none_token_id(self) -> Optional[int]:
+        if not self.use_condition_none_token: return None
+        return self.freq_token_start_id + self.n_freq_tokens
+    @property
+    def domain_none_token_id(self) -> Optional[int]:
+        if not self.use_condition_none_token: return None
+        return self.domain_token_start_id + self.n_domain_tokens
 
     def __post_init__(self):
         assert self.n_freq_tokens >= 0 and self.n_domain_tokens >= 0, \
@@ -113,6 +125,8 @@ class ChronosCondConfig:
                     raise ValueError(f"Some freq_ids are out of range [0, {self.n_freq_tokens - 1}].")
 
         if domain_id is not None:
+            if isinstance(domain_id, float):
+                raise ValueError(f"domain_id cannot be a float (got {domain_id}).")
             if self.n_domain_tokens == 0:
                 raise ValueError("domain_ids provided but n_domain_tokens == 0 in config.")
             if isinstance(domain_id, int):
@@ -293,6 +307,10 @@ class CondMeanScaleUniformBins(ChronosCondTokenizer):
         domain_id: Optional[Union[int, torch.Tensor]],
     ) -> Optional[torch.Tensor]:
 
+        # if freq_id or domain_id is float, it means it's nan and should be None
+        if isinstance(freq_id, float): freq_id = None
+        if isinstance(domain_id, float): domain_id = None
+
         self.config.validate_condition_args(freq_id=freq_id, domain_id=domain_id)
 
         pieces = []
@@ -308,6 +326,11 @@ class CondMeanScaleUniformBins(ChronosCondTokenizer):
                 dtype=torch.long, device=device
             ).unsqueeze(1)  # (B,1)
             pieces.append(freq_tok_ids)
+        else:
+            if self.config.use_condition_none_token:
+                none_freq_tok_ids = torch.full((batch_size,), fill_value=self.config.freq_none_token_id,
+                                               dtype=torch.long, device=device).unsqueeze(1)  # (B,1)
+                pieces.append(none_freq_tok_ids)
 
         if domain_id is not None:
             if isinstance(domain_id, int):
@@ -319,6 +342,11 @@ class CondMeanScaleUniformBins(ChronosCondTokenizer):
                 dtype=torch.long, device=device
             ).unsqueeze(1)  # (B,1)
             pieces.append(dom_tok_ids)
+        else:
+            if self.config.use_condition_none_token:
+                none_dom_tok_ids = torch.full((batch_size,), fill_value=self.config.domain_none_token_id,
+                                              dtype=torch.long, device=device).unsqueeze(1)  # (B,1)
+                pieces.append(none_dom_tok_ids)
 
         if not pieces:
             return None
