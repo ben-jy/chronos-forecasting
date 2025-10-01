@@ -1,14 +1,16 @@
 training_data_paths:
 - "$PROJECTS/cond_chronos_nullable_shuffled.arrow"
+- "$PROJECTS/kernelsynth-data.arrow"
 probability:
-- 1.0
+- 0.9
+- 0.1
 context_length: 512
 prediction_length: 64
 min_past: 60
 max_steps: 400_000
 save_steps: 150_000
 log_steps: 100
-per_device_train_batch_size: 256
+per_device_train_batch_size: 128
 learning_rate: 0.001
 optim: adamw_torch_fused
 num_samples: 20
