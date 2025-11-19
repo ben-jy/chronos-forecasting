@@ -27,7 +27,7 @@ tokenizer_class: "CondMeanScaleUniformBins"
 tokenizer_kwargs:
   low_limit: -15.0
   high_limit: 15.0
-n_tokens: 4096
+n_tokens: 4103
 n_freq_tokens: 3
 n_domain_tokens: 4
 lr_scheduler_type: linear
@@ -36,3 +36,4 @@ dataloader_num_workers: 1
 max_missing_prop: 0.9
 use_eos_token: true
 use_condition_none_token: true
+run_base_name: "chronos-conditioned-t5-tiny-nullable-w-kernelsynth-4103tokens"
