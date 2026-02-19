@@ -1,0 +1,88 @@
+{
+    "buildings_900k": {
+        "name": "Buildings (900k)",
+        "hf_subset_name": "buildings_900k",
+        "hf_dataset_name": "Salesforce/lotsa_data",
+        "freq": "h",
+        "target": [
+            {
+                "name": "target",
+                "domain": "energy"
+            }
+        ]
+    },
+    "kddcup2022": {
+        "name": "KDD Cup 2022",
+        "hf_subset_name": "kdd2022",
+        "hf_dataset_name": "Salesforce/lotsa_data",
+        "freq": "10min",
+        "target": [
+            {
+                "name": "target",
+                "domain": "energy"
+            }
+        ]
+    },
+    "extended_web_traffic": {
+        "name": "Extended Web Traffic",
+        "hf_subset_name": "extended_web_traffic_with_missing",
+        "hf_dataset_name": "Salesforce/lotsa_data",
+        "freq": "D",
+        "target": [
+            {
+                "name": "target",
+                "domain": "web"
+            }
+        ]
+    },
+    "wiki-rolling_nips": {
+        "name": "Wiki Rolling NIPS",
+        "hf_subset_name": "wiki-rolling_nips",
+        "hf_dataset_name": "Salesforce/lotsa_data",
+        "freq": "D",
+        "target": [
+            {
+                "name": "target",
+                "domain": "web"
+            }
+        ]
+    },
+    "kaggle_web_traffic": {
+        "name": "Kaggle Web Traffic",
+        "hf_subset_name": "kaggle_web_traffic_weekly",
+        "hf_dataset_name": "Salesforce/lotsa_data",
+        "freq": "W",
+        "target": [
+            {
+                "name": "target",
+                "domain": "web"
+            }
+        ]
+    },
+    "largest_2018": {
+        "name": "Largest 2018",
+        "hf_subset_name": "largest_2018",
+        "hf_dataset_name": "Salesforce/lotsa_data",
+        "freq": "5min",
+        "target": [
+            {
+                "name": "target",
+                "domain": "transport"
+            }
+        ]
+    },
+    "largest_2021": {
+        "name": "Largest 2021",
+        "hf_subset_name": "largest_2021",
+        "hf_dataset_name": "Salesforce/lotsa_data",
+        "freq": "5min",
+        "target": [
+            {
+                "name": "target",
+                "domain": "transport"
+            }
+        ]
+    }
+}
+
+

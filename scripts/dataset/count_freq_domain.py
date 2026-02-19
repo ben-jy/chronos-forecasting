@@ -4,10 +4,20 @@ os.environ['HF_HOME'] = f"{os.environ['PROJECTS']}/.cache/huggingface"
 import json
 import datasets
 import logging
+import argparse
 
 logging.basicConfig(level=logging.INFO)
 
-datasets_metadata = json.load(open("scripts/dataset/subsets_new.json", "r"))
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--input-json",
+    type=str,
+    required=True,
+    help="Path to the subset JSON definition file."
+)
+args = parser.parse_args()
+
+datasets_metadata = json.load(open(args.input_json, "r"))
 
 domain_counts = {} # number of time points per domain
 freq_counts = {}   # number of time points per frequency

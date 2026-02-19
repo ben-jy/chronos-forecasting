@@ -1,0 +1,1056 @@
+{
+    "brazilian_cities_temp": {
+        "name": "Brazilian Cities Temperature",
+        "hf_subset_name": "brazilian_cities_temperature",
+        "hf_dataset_name": "autogluon/chronos_datasets_extra",
+        "freq": "ME",
+        "target": [
+            {
+                "name": "temperature",
+                "domain": "weather"
+            }
+        ]
+    },
+    "mexico_city_bikes": {
+        "name": "Mexico City Bikes",
+        "hf_subset_name": "mexico_city_bikes",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "h",
+        "target": [
+            {
+                "name": "target",
+                "domain": "transport"
+            }
+        ]
+    },
+    "solar_5min": {
+        "name": "Solar (5 Min.)",
+        "hf_subset_name": "solar",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "5min",
+        "target": [
+            {
+                "name": "power_mw",
+                "domain": "energy"
+            }
+        ]
+    },
+    "solar_hourly": {
+        "name": "Solar (Hourly)",
+        "hf_subset_name": "solar_1h",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "h",
+        "target": [
+            {
+                "name": "power_mw",
+                "domain": "energy"
+            }
+        ]
+    },
+    "spanish_energy_weather": {
+        "name": "Spanish Energy and Weather",
+        "hf_subset_name": "spanish_energy_and_weather",
+        "hf_dataset_name": "autogluon/chronos_datasets_extra",
+        "freq": "h",
+        "target": [
+            {
+                "name": "generation_biomass",
+                "domain": "energy"
+            },
+            {
+                "name": "generation_fossil_brown_coal/lignite",
+                "domain": "energy"
+            },
+            {
+                "name": "generation_fossil_gas",
+                "domain": "energy"
+            },
+            {
+                "name": "generation_fossil_hard_coal",
+                "domain": "energy"
+            },
+            {
+                "name": "generation_fossil_oil",
+                "domain": "energy"
+            },
+            {
+                "name": "generation_hydro_pumped_storage_consumption",
+                "domain": "energy"
+            },
+            {
+                "name": "generation_hydro_run-of-river_and_poundage",
+                "domain": "energy"
+            },
+            {
+                "name": "generation_hydro_water_reservoir",
+                "domain": "energy"
+            },
+            {
+                "name": "generation_nuclear",
+                "domain": "energy"
+            },
+            {
+                "name": "generation_other",
+                "domain": "energy"
+            },
+            {
+                "name": "generation_other_renewable",
+                "domain": "energy"
+            },
+            {
+                "name": "generation_solar",
+                "domain": "energy"
+            },
+            {
+                "name": "generation_waste",
+                "domain": "energy"
+            },
+            {
+                "name": "generation_wind_onshore",
+                "domain": "energy"
+            },
+            {
+                "name": "total_load_actual",
+                "domain": "energy"
+            },
+            {
+                "name": "price_actual",
+                "domain": "energy"
+            },
+            {
+                "name": "Barcelona_temp",
+                "domain": "weather"
+            },
+            {
+                "name": "Bilbao_temp",
+                "domain": "weather"
+            },
+            {
+                "name": "Madrid_temp",
+                "domain": "weather"
+            },
+            {
+                "name": "Seville_temp",
+                "domain": "weather"
+            },
+            {
+                "name": "Valencia_temp",
+                "domain": "weather"
+            },
+            {
+                "name": "Barcelona_temp_min",
+                "domain": "weather"
+            },
+            {
+                "name": "Bilbao_temp_min",
+                "domain": "weather"
+            },
+            {
+                "name": "Madrid_temp_min",
+                "domain": "weather"
+            },
+            {
+                "name": "Seville_temp_min",
+                "domain": "weather"
+            },
+            {
+                "name": "Valencia_temp_min",
+                "domain": "weather"
+            },
+            {
+                "name": "Barcelona_temp_max",
+                "domain": "weather"
+            },
+            {
+                "name": "Bilbao_temp_max",
+                "domain": "weather"
+            },
+            {
+                "name": "Madrid_temp_max",
+                "domain": "weather"
+            },
+            {
+                "name": "Seville_temp_max",
+                "domain": "weather"
+            },
+            {
+                "name": "Valencia_temp_max",
+                "domain": "weather"
+            },
+            {
+                "name": "Barcelona_pressure",
+                "domain": "weather"
+            },
+            {
+                "name": "Bilbao_pressure",
+                "domain": "weather"
+            },
+            {
+                "name": "Madrid_pressure",
+                "domain": "weather"
+            },
+            {
+                "name": "Seville_pressure",
+                "domain": "weather"
+            },
+            {
+                "name": "Valencia_pressure",
+                "domain": "weather"
+            },
+            {
+                "name": "Barcelona_humidity",
+                "domain": "weather"
+            },
+            {
+                "name": "Bilbao_humidity",
+                "domain": "weather"
+            },
+            {
+                "name": "Madrid_humidity",
+                "domain": "weather"
+            },
+            {
+                "name": "Seville_humidity",
+                "domain": "weather"
+            },
+            {
+                "name": "Valencia_humidity",
+                "domain": "weather"
+            },
+            {
+                "name": "Barcelona_wind_speed",
+                "domain": "weather"
+            },
+            {
+                "name": "Bilbao_wind_speed",
+                "domain": "weather"
+            },
+            {
+                "name": "Madrid_wind_speed",
+                "domain": "weather"
+            },
+            {
+                "name": "Seville_wind_speed",
+                "domain": "weather"
+            },
+            {
+                "name": "Valencia_wind_speed",
+                "domain": "weather"
+            },
+            {
+                "name": "Barcelona_wind_deg",
+                "domain": "weather"
+            },
+            {
+                "name": "Bilbao_wind_deg",
+                "domain": "weather"
+            },
+            {
+                "name": "Madrid_wind_deg",
+                "domain": "weather"
+            },
+            {
+                "name": "Seville_wind_deg",
+                "domain": "weather"
+            },
+            {
+                "name": "Valencia_wind_deg",
+                "domain": "weather"
+            },
+            {
+                "name": "Barcelona_rain_1h",
+                "domain": "weather"
+            },
+            {
+                "name": "Bilbao_rain_1h",
+                "domain": "weather"
+            },
+            {
+                "name": "Madrid_rain_1h",
+                "domain": "weather"
+            },
+            {
+                "name": "Seville_rain_1h",
+                "domain": "weather"
+            },
+            {
+                "name": "Valencia_rain_1h",
+                "domain": "weather"
+            },
+            {
+                "name": "Barcelona_snow_3h",
+                "domain": "weather"
+            },
+            {
+                "name": "Bilbao_snow_3h",
+                "domain": "weather"
+            },
+            {
+                "name": "Madrid_snow_3h",
+                "domain": "weather"
+            },
+            {
+                "name": "Seville_snow_3h",
+                "domain": "weather"
+            },
+            {
+                "name": "Valencia_snow_3h",
+                "domain": "weather"
+            },
+            {
+                "name": "Barcelona_clouds_all",
+                "domain": "weather"
+            },
+            {
+                "name": "Bilbao_clouds_all",
+                "domain": "weather"
+            },
+            {
+                "name": "Madrid_clouds_all",
+                "domain": "weather"
+            },
+            {
+                "name": "Seville_clouds_all",
+                "domain": "weather"
+            },
+            {
+                "name": "Valencia_clouds_all",
+                "domain": "weather"
+            }
+        ]
+    },
+    "taxi_hourly": {
+        "name": "Taxi (Hourly)",
+        "hf_subset_name": "taxi_1h",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "h",
+        "target": [
+            {
+                "name": "target",
+                "domain": "transport"
+            }
+        ]
+    },
+    "ushcn": {
+        "name": "USHCN",
+        "hf_subset_name": "ushcn_daily",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "D",
+        "target": [
+            {
+                "name": "PRCP",
+                "domain": "weather"
+            },
+            {
+                "name": "SNOW",
+                "domain": "weather"
+            },
+            {
+                "name": "SNWD",
+                "domain": "weather"
+            },
+            {
+                "name": "TMAX",
+                "domain": "weather"
+            },
+            {
+                "name": "TMIN",
+                "domain": "weather"
+            }
+        ]
+    },
+    "weatherbench_daily": {
+        "name": "Weatherbench (Daily)",
+        "hf_subset_name": "weatherbench_daily",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "D",
+        "target": [
+            {
+                "name": "target",
+                "domain": "weather"
+            }
+        ]
+    },
+    "weatherbench_hourly": {
+        "name": "Weatherbench (Hourly)",
+        "hf_subset_name": "weatherbench_hourly_temperature",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "h",
+        "target": [
+            {
+                "name": "target",
+                "domain": "weather"
+            }
+        ]
+    },
+    "weatherbench_weekly": {
+        "name": "Weatherbench (Weekly)",
+        "hf_subset_name": "weatherbench_weekly",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "W",
+        "target": [
+            {
+                "name": "target",
+                "domain": "weather"
+            }
+        ]
+    },
+    "wiki_daily_100k": {
+        "name": "Wiki Daily (100k)",
+        "hf_subset_name": "wiki_daily_100k",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "D",
+        "target": [
+            {
+                "name": "target",
+                "domain": "web"
+            }
+        ]
+    },
+    "windfarms_daily": {
+        "name": "Wind Farms (Daily)",
+        "hf_subset_name": "wind_farms_daily",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "D",
+        "target": [
+            {
+                "name": "target",
+                "domain": "energy"
+            }
+        ]
+    },
+    "windfarms_hourly": {
+        "name": "Wind Farms (Hourly)",
+        "hf_subset_name": "wind_farms_hourly",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "h",
+        "target": [
+            {
+                "name": "target",
+                "domain": "energy"
+            }
+        ]
+    },
+    "electricity_15min": {
+        "name": "Electricity (15 Min.)",
+        "hf_subset_name": "electricity_15min",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "15min",
+        "target": [
+            {
+                "name": "consumption_kW",
+                "domain": "energy"
+            }
+        ]
+    },
+    "electricity_hourly": {
+        "name": "Electricity (Hourly)",
+        "hf_subset_name": "monash_electricity_hourly",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "h",
+        "target": [
+            {
+                "name": "target",
+                "domain": "energy"
+            }
+        ]
+    },
+    "electricity_weekly": {
+        "name": "Electricity (Weekly)",
+        "hf_subset_name": "monash_electricity_weekly",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "W",
+        "target": [
+            {
+                "name": "target",
+                "domain": "energy"
+            }
+        ]
+    },
+    "kddcup2018": {
+        "name": "KDD Cup 2018",
+        "hf_subset_name": "monash_kdd_cup_2018",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "h",
+        "target": [
+            {
+                "name": "target",
+                "domain": "weather"
+            }
+        ]
+    },
+    "london_smart_meters": {
+        "name": "London Smart Meters",
+        "hf_subset_name": "monash_london_smart_meters",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "30min",
+        "target": [
+            {
+                "name": "target",
+                "domain": "energy"
+            }
+        ]
+    },
+    "m4_daily": {
+        "name": "M4 (Daily)",
+        "hf_subset_name": "m4_daily",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "D",
+        "target": [
+            {
+                "name": "target",
+                "domain": null
+            }
+        ]
+    },
+    "m4_hourly": {
+        "name": "M4 (Hourly)",
+        "hf_subset_name": "m4_hourly",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "h",
+        "target": [
+            {
+                "name": "target",
+                "domain": null
+            }
+        ]
+    },
+    "m4_monthly": {
+        "name": "M4 (Monthly)",
+        "hf_subset_name": "m4_monthly",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "ME",
+        "target": [
+            {
+                "name": "target",
+                "domain": null
+            }
+        ]
+    },
+    "m4_weekly": {
+        "name": "M4 (Weekly)",
+        "hf_subset_name": "m4_weekly",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "W",
+        "target": [
+            {
+                "name": "target",
+                "domain": null
+            }
+        ]
+    },
+    "pedestrian_counts": {
+        "name": "Pedestrian Counts",
+        "hf_subset_name": "monash_pedestrian_counts",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "h",
+        "target": [
+            {
+                "name": "target",
+                "domain": "transport"
+            }
+        ]
+    },
+    "rideshare": {
+        "name": "Rideshare",
+        "hf_subset_name": "monash_rideshare",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "h",
+        "target": [
+            {
+                "name": "price_min",
+                "domain": "transport"
+            },
+            {
+                "name": "price_mean",
+                "domain": "transport"
+            },
+            {
+                "name": "price_max",
+                "domain": "transport"
+            },
+            {
+                "name": "distance_min",
+                "domain": "transport"
+            },
+            {
+                "name": "distance_mean",
+                "domain": "transport"
+            },
+            {
+                "name": "distance_max",
+                "domain": "transport"
+            },
+            {
+                "name": "surge_min",
+                "domain": "transport"
+            },
+            {
+                "name": "surge_mean",
+                "domain": "transport"
+            },
+            {
+                "name": "surge_max",
+                "domain": "transport"
+            },
+            {
+                "name": "api_calls",
+                "domain": "transport"
+            },
+            {
+                "name": "temp",
+                "domain": "weather"
+            },
+            {
+                "name": "rain",
+                "domain": "weather"
+            },
+            {
+                "name": "humidity",
+                "domain": "weather"
+            },
+            {
+                "name": "clouds",
+                "domain": "weather"
+            },
+            {
+                "name": "wind",
+                "domain": "weather"
+            }
+        ]
+    },
+    "taxi_30min": {
+        "name": "Taxi (30 Min.)",
+        "hf_subset_name": "taxi_30min",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "30min",
+        "target": [
+            {
+                "name": "target",
+                "domain": "transport"
+            }
+        ]
+    },
+    "temperature_rain": {
+        "name": "Temperature-Rain",
+        "hf_subset_name": "monash_temperature_rain",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "D",
+        "target": [
+            {
+                "name": "t_mean",
+                "domain": "weather"
+            },
+            {
+                "name": "prcp_sum",
+                "domain": "weather"
+            },
+            {
+                "name": "t_max",
+                "domain": "weather"
+            },
+            {
+                "name": "t_min",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_0_dailypop",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_0_dailypop1",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_0_dailypop10",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_0_dailypop15",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_0_dailypop25",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_0_dailypop5",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_0_dailypop50",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_0_dailyprecip",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_0_dailyprecip10pct",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_0_dailyprecip25pct",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_0_dailyprecip50pct",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_0_dailyprecip75pct",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_1_dailypop",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_1_dailypop1",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_1_dailypop10",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_1_dailypop15",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_1_dailypop25",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_1_dailypop5",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_1_dailypop50",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_1_dailyprecip",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_1_dailyprecip10pct",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_1_dailyprecip25pct",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_1_dailyprecip50pct",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_1_dailyprecip75pct",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_2_dailypop",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_2_dailypop1",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_2_dailypop10",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_2_dailypop15",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_2_dailypop25",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_2_dailypop5",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_2_dailypop50",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_2_dailyprecip",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_2_dailyprecip10pct",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_2_dailyprecip25pct",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_2_dailyprecip50pct",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_2_dailyprecip75pct",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_3_dailypop",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_3_dailypop1",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_3_dailypop10",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_3_dailypop15",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_3_dailypop25",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_3_dailypop5",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_3_dailypop50",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_3_dailyprecip",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_3_dailyprecip10pct",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_3_dailyprecip25pct",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_3_dailyprecip50pct",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_3_dailyprecip75pct",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_4_dailypop",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_4_dailypop1",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_4_dailypop10",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_4_dailypop15",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_4_dailypop25",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_4_dailypop5",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_4_dailypop50",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_4_dailyprecip",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_4_dailyprecip10pct",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_4_dailyprecip25pct",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_4_dailyprecip50pct",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_4_dailyprecip75pct",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_5_dailypop",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_5_dailypop1",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_5_dailypop10",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_5_dailypop15",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_5_dailypop25",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_5_dailypop5",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_5_dailypop50",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_5_dailyprecip",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_5_dailyprecip10pct",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_5_dailyprecip25pct",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_5_dailyprecip50pct",
+                "domain": "weather"
+            },
+            {
+                "name": "fcst_5_dailyprecip75pct",
+                "domain": "weather"
+            }
+        ]
+    },
+    "uber_tlc_daily": {
+        "name": "Uber TLC (Daily)",
+        "hf_subset_name": "uber_tlc_daily",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "D",
+        "target": [
+            {
+                "name": "target",
+                "domain": "transport"
+            }
+        ]
+    },
+    "uber_tlc_hourly": {
+        "name": "Uber TLC (Hourly)",
+        "hf_subset_name": "uber_tlc_hourly",
+        "hf_dataset_name": "autogluon/chronos_datasets",
+        "freq": "h",
+        "target": [
+            {
+                "name": "target",
+                "domain": "transport"
+            }
+        ]
+    },
+    "buildings_900k": {
+        "name": "Buildings (900k)",
+        "hf_subset_name": "buildings_900k",
+        "hf_dataset_name": "Salesforce/lotsa_data",
+        "freq": "h",
+        "target": [
+            {
+                "name": "target",
+                "domain": "energy"
+            }
+        ]
+    },
+    "kddcup2022": {
+        "name": "KDD Cup 2022",
+        "hf_subset_name": "kdd2022",
+        "hf_dataset_name": "Salesforce/lotsa_data",
+        "freq": "10min",
+        "target": [
+            {
+                "name": "target",
+                "domain": "energy"
+            }
+        ]
+    },
+    "extended_web_traffic": {
+        "name": "Extended Web Traffic",
+        "hf_subset_name": "extended_web_traffic_with_missing",
+        "hf_dataset_name": "Salesforce/lotsa_data",
+        "freq": "D",
+        "target": [
+            {
+                "name": "target",
+                "domain": "web"
+            }
+        ]
+    },
+    "wiki-rolling_nips": {
+        "name": "Wiki Rolling NIPS",
+        "hf_subset_name": "wiki-rolling_nips",
+        "hf_dataset_name": "Salesforce/lotsa_data",
+        "freq": "D",
+        "target": [
+            {
+                "name": "target",
+                "domain": "web"
+            }
+        ]
+    },
+    "kaggle_web_traffic": {
+        "name": "Kaggle Web Traffic",
+        "hf_subset_name": "kaggle_web_traffic_weekly",
+        "hf_dataset_name": "Salesforce/lotsa_data",
+        "freq": "W",
+        "target": [
+            {
+                "name": "target",
+                "domain": "web"
+            }
+        ]
+    },
+    "largest_2018": {
+        "name": "Largest 2018",
+        "hf_subset_name": "largest_2018",
+        "hf_dataset_name": "Salesforce/lotsa_data",
+        "freq": "5min",
+        "target": [
+            {
+                "name": "target",
+                "domain": "transport"
+            }
+        ]
+    },
+    "largest_2021": {
+        "name": "Largest 2021",
+        "hf_subset_name": "largest_2021",
+        "hf_dataset_name": "Salesforce/lotsa_data",
+        "freq": "5min",
+        "target": [
+            {
+                "name": "target",
+                "domain": "transport"
+            }
+        ]
+    }
+}
+
+
