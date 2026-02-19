@@ -25,6 +25,7 @@ from transformers.utils import ModelOutput
 
 from .base import BaseChronosPipeline, ForecastType
 
+
 logger = logging.getLogger(__file__)
 
 
@@ -60,9 +61,7 @@ class Patch(nn.Module):
                 *x.shape[:-1],
                 self.patch_size - (length % self.patch_size),
             )
-            padding = torch.full(
-                size=padding_size, fill_value=torch.nan, dtype=x.dtype, device=x.device
-            )
+            padding = torch.full(size=padding_size, fill_value=torch.nan, dtype=x.dtype, device=x.device)
             x = torch.concat((padding, x), dim=-1)
 
         x = x.unfold(dimension=-1, size=self.patch_size, step=self.patch_stride)
@@ -71,34 +70,44 @@ class Patch(nn.Module):
 
 class InstanceNorm(nn.Module):
     """
-    See, also, RevIN. Apply standardization along the last dimension.
+    Apply standardization along the last dimension and optionally apply arcsinh after standardization.
     """
 
-    def __init__(self, eps: float = 1e-5) -> None:
+    def __init__(self, eps: float = 1e-5, use_arcsinh: bool = False) -> None:
         super().__init__()
         self.eps = eps
+        self.use_arcsinh = use_arcsinh
 
     def forward(
-        self,
-        x: torch.Tensor,
-        loc_scale: Optional[Tuple[torch.Tensor, torch.Tensor]] = None,
-    ) -> Tuple[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
+        self, x: torch.Tensor, loc_scale: tuple[torch.Tensor, torch.Tensor] | None = None
+    ) -> tuple[torch.Tensor, tuple[torch.Tensor, torch.Tensor]]:
+        orig_dtype = x.dtype
+        x = x.to(torch.float32)
         if loc_scale is None:
             loc = torch.nan_to_num(torch.nanmean(x, dim=-1, keepdim=True), nan=0.0)
-            scale = torch.nan_to_num(
-                torch.nanmean((x - loc).square(), dim=-1, keepdim=True).sqrt(), nan=1.0
-            )
+            scale = torch.nan_to_num((x - loc).square().nanmean(dim=-1, keepdim=True).sqrt(), nan=1.0)
             scale = torch.where(scale == 0, self.eps, scale)
         else:
             loc, scale = loc_scale
 
-        return (x - loc) / scale, (loc, scale)
+        scaled_x = (x - loc) / scale
 
-    def inverse(
-        self, x: torch.Tensor, loc_scale: Tuple[torch.Tensor, torch.Tensor]
-    ) -> torch.Tensor:
+        if self.use_arcsinh:
+            scaled_x = torch.arcsinh(scaled_x)
+
+        return scaled_x.to(orig_dtype), (loc, scale)
+
+    def inverse(self, x: torch.Tensor, loc_scale: tuple[torch.Tensor, torch.Tensor]) -> torch.Tensor:
+        orig_dtype = x.dtype
+        x = x.to(torch.float32)
         loc, scale = loc_scale
-        return x * scale + loc
+
+        if self.use_arcsinh:
+            x = torch.sinh(x)
+
+        x = x * scale + loc
+
+        return x.to(orig_dtype)
 
 
 class ResidualBlock(nn.Module):
@@ -185,6 +194,7 @@ class ChronosBoltModelForForecasting(T5PreTrainedModel):
 
         self.num_quantiles = len(self.chronos_config.quantiles)
         quantiles = torch.tensor(self.chronos_config.quantiles, dtype=self.dtype)
+        self.quantiles: torch.Tensor
         self.register_buffer("quantiles", quantiles, persistent=False)
 
         self.output_patch_embedding = ResidualBlock(
@@ -213,41 +223,24 @@ class ChronosBoltModelForForecasting(T5PreTrainedModel):
                 mean=0.0,
                 std=factor * ((self.chronos_config.input_patch_size * 2) ** -0.5),
             )
-            if (
-                hasattr(module.hidden_layer, "bias")
-                and module.hidden_layer.bias is not None
-            ):
+            if hasattr(module.hidden_layer, "bias") and module.hidden_layer.bias is not None:
                 module.hidden_layer.bias.data.zero_()
 
             module.residual_layer.weight.data.normal_(
                 mean=0.0,
                 std=factor * ((self.chronos_config.input_patch_size * 2) ** -0.5),
             )
-            if (
-                hasattr(module.residual_layer, "bias")
-                and module.residual_layer.bias is not None
-            ):
+            if hasattr(module.residual_layer, "bias") and module.residual_layer.bias is not None:
                 module.residual_layer.bias.data.zero_()
 
-            module.output_layer.weight.data.normal_(
-                mean=0.0, std=factor * ((self.config.d_ff) ** -0.5)
-            )
-            if (
-                hasattr(module.output_layer, "bias")
-                and module.output_layer.bias is not None
-            ):
+            module.output_layer.weight.data.normal_(mean=0.0, std=factor * ((self.config.d_ff) ** -0.5))
+            if hasattr(module.output_layer, "bias") and module.output_layer.bias is not None:
                 module.output_layer.bias.data.zero_()
 
     def encode(
         self, context: torch.Tensor, mask: Optional[torch.Tensor] = None
-    ) -> Tuple[
-        torch.Tensor, Tuple[torch.Tensor, torch.Tensor], torch.Tensor, torch.Tensor
-    ]:
-        mask = (
-            mask.to(context.dtype)
-            if mask is not None
-            else torch.isnan(context).logical_not().to(context.dtype)
-        )
+    ) -> Tuple[torch.Tensor, Tuple[torch.Tensor, torch.Tensor], torch.Tensor, torch.Tensor]:
+        mask = mask.to(context.dtype) if mask is not None else torch.isnan(context).logical_not().to(context.dtype)
 
         batch_size, _ = context.shape
         if context.shape[-1] > self.chronos_config.context_length:
@@ -270,9 +263,7 @@ class ChronosBoltModelForForecasting(T5PreTrainedModel):
         patched_context = torch.cat([patched_context, patched_mask], dim=-1)
 
         # attention_mask = 1 if at least one item in the patch is observed
-        attention_mask = (
-            patched_mask.sum(dim=-1) > 0
-        )  # (batch_size, patched_seq_length)
+        attention_mask = patched_mask.sum(dim=-1) > 0  # (batch_size, patched_seq_length)
 
         input_embeds = self.input_patch_embedding(patched_context)
 
@@ -309,9 +300,7 @@ class ChronosBoltModelForForecasting(T5PreTrainedModel):
     ) -> ChronosBoltOutput:
         batch_size = context.size(0)
 
-        hidden_states, loc_scale, input_embeds, attention_mask = self.encode(
-            context=context, mask=mask
-        )
+        hidden_states, loc_scale, input_embeds, attention_mask = self.encode(context=context, mask=mask)
         sequence_output = self.decode(input_embeds, attention_mask, hidden_states)
 
         quantile_preds_shape = (
@@ -319,9 +308,7 @@ class ChronosBoltModelForForecasting(T5PreTrainedModel):
             self.num_quantiles,
             self.chronos_config.prediction_length,
         )
-        quantile_preds = self.output_patch_embedding(sequence_output).view(
-            *quantile_preds_shape
-        )
+        quantile_preds = self.output_patch_embedding(sequence_output).view(*quantile_preds_shape)
 
         loss = None
         if target is not None:
@@ -332,9 +319,7 @@ class ChronosBoltModelForForecasting(T5PreTrainedModel):
 
             target = target.to(quantile_preds.device)
             target_mask = (
-                target_mask.unsqueeze(1).to(quantile_preds.device)
-                if target_mask is not None
-                else ~torch.isnan(target)
+                target_mask.unsqueeze(1).to(quantile_preds.device) if target_mask is not None else ~torch.isnan(target)
             )
             target[~target_mask] = 0.0
 
@@ -344,21 +329,14 @@ class ChronosBoltModelForForecasting(T5PreTrainedModel):
                     *target.shape[:-1],
                     self.chronos_config.prediction_length - target.shape[-1],
                 )
-                target = torch.cat(
-                    [target, torch.zeros(padding_shape).to(target)], dim=-1
-                )
-                target_mask = torch.cat(
-                    [target_mask, torch.zeros(padding_shape).to(target_mask)], dim=-1
-                )
+                target = torch.cat([target, torch.zeros(padding_shape).to(target)], dim=-1)
+                target_mask = torch.cat([target_mask, torch.zeros(padding_shape).to(target_mask)], dim=-1)
 
             loss = (
                 2
                 * torch.abs(
                     (target - quantile_preds)
-                    * (
-                        (target <= quantile_preds).float()
-                        - self.quantiles.view(1, self.num_quantiles, 1)  # type: ignore
-                    )
+                    * ((target <= quantile_preds).float() - self.quantiles.view(1, self.num_quantiles, 1))
                 )
                 * target_mask.float()
             )
@@ -431,6 +409,14 @@ class ChronosBoltPipeline(BaseChronosPipeline):
         self.model = model
 
     @property
+    def model_context_length(self) -> int:
+        return self.model.chronos_config.context_length
+
+    @property
+    def model_prediction_length(self) -> int:
+        return self.model.chronos_config.prediction_length
+
+    @property
     def quantiles(self) -> List[float]:
         return self.model.config.chronos_config["quantiles"]
 
@@ -474,9 +460,9 @@ class ChronosBoltPipeline(BaseChronosPipeline):
             loc_scale[1].squeeze(-1).cpu(),
         )
 
-    def predict(  # type: ignore[override]
+    def predict(
         self,
-        context: Union[torch.Tensor, List[torch.Tensor]],
+        inputs: Union[torch.Tensor, List[torch.Tensor]],
         prediction_length: Optional[int] = None,
         limit_prediction_length: bool = False,
     ) -> torch.Tensor:
@@ -505,18 +491,16 @@ class ChronosBoltPipeline(BaseChronosPipeline):
         ------
         ValueError
             When limit_prediction_length is True and the prediction_length is
-            greater than model's trainig prediction_length.
+            greater than model's training prediction_length.
         """
-        context_tensor = self._prepare_and_validate_context(context=context)
+        context_tensor = self._prepare_and_validate_context(context=inputs)
 
-        model_context_length = self.model.config.chronos_config["context_length"]
-        model_prediction_length = self.model.config.chronos_config["prediction_length"]
         if prediction_length is None:
-            prediction_length = model_prediction_length
+            prediction_length = self.model_prediction_length
 
-        if prediction_length > model_prediction_length:
+        if prediction_length > self.model_prediction_length:
             msg = (
-                f"We recommend keeping prediction length <= {model_prediction_length}. "
+                f"We recommend keeping prediction length <= {self.model_prediction_length}. "
                 "The quality of longer predictions may degrade since the model is not optimized for it. "
             )
             if limit_prediction_length:
@@ -529,40 +513,52 @@ class ChronosBoltPipeline(BaseChronosPipeline):
 
         # We truncate the context here because otherwise batches with very long
         # context could take up large amounts of GPU memory unnecessarily.
-        if context_tensor.shape[-1] > model_context_length:
-            context_tensor = context_tensor[..., -model_context_length:]
+        if context_tensor.shape[-1] > self.model_context_length:
+            context_tensor = context_tensor[..., -self.model_context_length :]
 
-        # TODO: We unroll the forecast of Chronos Bolt greedily with the full forecast
-        # horizon that the model was trained with (i.e., 64). This results in variance collapsing
-        # every 64 steps.
-        context_tensor = context_tensor.to(
-            device=self.model.device,
-            dtype=torch.float32,
-        )
-        while remaining > 0:
-            with torch.no_grad():
-                prediction = self.model(
-                    context=context_tensor,
-                ).quantile_preds.to(context_tensor)
+        context_tensor = context_tensor.to(device=self.model.device, dtype=torch.float32)
+        # First block prediction
+        with torch.no_grad():
+            prediction: torch.Tensor = self.model(context=context_tensor).quantile_preds.to(context_tensor)
 
             predictions.append(prediction)
             remaining -= prediction.shape[-1]
 
-            if remaining <= 0:
-                break
+        # NOTE: The following heuristic for better prediction intervals with long-horizon forecasts
+        # uses all quantiles generated by the model for the first `model_prediction_length` steps,
+        # concatenating each quantile with the context and generating the next `model_prediction_length` steps.
+        # The `num_quantiles * num_quantiles` "samples" thus generated are then reduced to `num_quantiles`
+        # by computing empirical quantiles. Note that this option scales the batch size by `num_quantiles`
+        # when the `prediction_length` is greater than `model_prediction_length`.
 
-            central_idx = torch.abs(torch.tensor(self.quantiles) - 0.5).argmin()
-            central_prediction = prediction[:, central_idx]
+        if remaining > 0:
+            # Expand the context along quantile axis
+            context_tensor = context_tensor.unsqueeze(1).repeat(1, len(self.quantiles), 1)
 
-            context_tensor = torch.cat([context_tensor, central_prediction], dim=-1)
+        quantile_tensor = torch.tensor(self.quantiles, device=context_tensor.device)
+        while remaining > 0:
+            # Append the prediction to context
+            context_tensor = torch.cat([context_tensor, prediction], dim=-1)[..., -self.model_context_length :]
+            (batch_size, n_quantiles, context_length) = context_tensor.shape
 
-        return torch.cat(predictions, dim=-1)[..., :prediction_length].to(
-            dtype=torch.float32, device="cpu"
-        )
+            with torch.no_grad():
+                # Reshape (batch, n_quantiles, context_length) -> (batch * n_quantiles, context_length)
+                prediction = self.model(
+                    context=context_tensor.reshape(batch_size * n_quantiles, context_length)
+                ).quantile_preds.to(context_tensor)
+            # Reshape predictions from (batch * n_quantiles, n_quantiles, model_prediction_length) to (batch, n_quantiles * n_quantiles, model_prediction_length)
+            prediction = prediction.reshape(batch_size, n_quantiles * n_quantiles, -1)
+            # Reduce `n_quantiles * n_quantiles` to n_quantiles and transpose back to (batch_size, n_quantiles, model_prediction_length)
+            prediction = torch.quantile(prediction, q=quantile_tensor, dim=1).transpose(0, 1)
+
+            predictions.append(prediction)
+            remaining -= prediction.shape[-1]
+
+        return torch.cat(predictions, dim=-1)[..., :prediction_length].to(dtype=torch.float32, device="cpu")
 
     def predict_quantiles(
         self,
-        context: Union[torch.Tensor, List[torch.Tensor]],
+        inputs: Union[torch.Tensor, List[torch.Tensor]],
         prediction_length: Optional[int] = None,
         quantile_levels: List[float] = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
         **predict_kwargs,
@@ -572,24 +568,20 @@ class ChronosBoltPipeline(BaseChronosPipeline):
         """
         # shape (batch_size, prediction_length, len(training_quantile_levels))
         predictions = (
-            self.predict(context, prediction_length=prediction_length, **predict_kwargs)
-            .detach()
-            .swapaxes(1, 2)
+            self.predict(inputs, prediction_length=prediction_length, **predict_kwargs).detach().swapaxes(1, 2)
         )
 
         training_quantile_levels = self.quantiles
 
         if set(quantile_levels).issubset(set(training_quantile_levels)):
             # no need to perform intra/extrapolation
-            quantiles = predictions[
-                ..., [training_quantile_levels.index(q) for q in quantile_levels]
-            ]
+            quantiles = predictions[..., [training_quantile_levels.index(q) for q in quantile_levels]]
         else:
             # we rely on torch for interpolating quantiles if quantiles that
             # Chronos Bolt was trained on were not provided
-            if min(quantile_levels) < min(training_quantile_levels) or max(
-                quantile_levels
-            ) > max(training_quantile_levels):
+            if min(quantile_levels) < min(training_quantile_levels) or max(quantile_levels) > max(
+                training_quantile_levels
+            ):
                 logger.warning(
                     f"\tQuantiles to be predicted ({quantile_levels}) are not within the range of "
                     f"quantiles that Chronos-Bolt was trained on ({training_quantile_levels}). "
@@ -615,24 +607,24 @@ class ChronosBoltPipeline(BaseChronosPipeline):
         return quantiles, mean
 
     @classmethod
-    def from_pretrained(cls, *args, **kwargs):
+    def from_pretrained(cls, pretrained_model_name_or_path, *args, **kwargs):
         """
-        Load the model, either from a local path or from the HuggingFace Hub.
-        Supports the same arguments as ``AutoConfig`` and ``AutoModel``
-        from ``transformers``.
+        Load the model, either from a local path S3 prefix or from the HuggingFace Hub.
+        Supports the same arguments as ``AutoConfig`` and ``AutoModel`` from ``transformers``.
         """
 
-        config = AutoConfig.from_pretrained(*args, **kwargs)
+        if str(pretrained_model_name_or_path).startswith("s3://"):
+            return BaseChronosPipeline.from_pretrained(pretrained_model_name_or_path, *args, **kwargs)
+
+        config = AutoConfig.from_pretrained(pretrained_model_name_or_path, *args, **kwargs)
         assert hasattr(config, "chronos_config"), "Not a Chronos config file"
 
         architecture = config.architectures[0]
         class_ = globals().get(architecture)
 
         if class_ is None:
-            logger.warning(
-                f"Unknown architecture: {architecture}, defaulting to ChronosBoltModelForForecasting"
-            )
+            logger.warning(f"Unknown architecture: {architecture}, defaulting to ChronosBoltModelForForecasting")
             class_ = ChronosBoltModelForForecasting
 
-        model = class_.from_pretrained(*args, **kwargs)
+        model = class_.from_pretrained(pretrained_model_name_or_path, *args, **kwargs)
         return cls(model=model)
