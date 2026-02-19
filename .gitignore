@@ -192,3 +192,9 @@ cython_debug/
 dev
 data
 .idea/
+.DS_store
+
+chronos-2-finetuned
+
+# Kiro IDE
+.kiro
